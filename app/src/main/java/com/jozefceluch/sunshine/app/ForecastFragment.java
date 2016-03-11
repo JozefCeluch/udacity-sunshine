@@ -71,9 +71,12 @@ public class ForecastFragment extends Fragment {
 
     public class FetchWeatherTask extends AsyncTask<Void, Void, Void> {
 
+        private final String TAG = FetchWeatherTask.class.getSimpleName();
+
         @Override
         protected Void doInBackground(Void... params) {
-            retrieveForecastJsonString();
+            String receivedJson = retrieveForecastJsonString();
+            Log.d(TAG, receivedJson);
             return null;
         }
 
