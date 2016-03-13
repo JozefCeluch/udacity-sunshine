@@ -1,5 +1,6 @@
 package com.jozefceluch.sunshine.app;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,7 +26,6 @@ import java.util.List;
 public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> forecastAdapter;
-    private String apiUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?q=London&mode=json&units=metric&cnt=7&appid=a81f2d1c3789ac0043ab476183c3c2da";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,85 +63,94 @@ public class ForecastFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_refresh) {
-            new FetchWeatherTask().execute();
+            new FetchWeatherTask().execute("London");
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public class FetchWeatherTask extends AsyncTask<Void, Void, Void> {
+    public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
+        private static final String BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily";
+        private static final String QUERY_PARAM = "q";
+        private static final String MODE_PARAM = "mode";
+        private static final String UNITS_PARAM = "units";
+        private static final String COUNT_PARAM = "cnt";
+        private static final String APP_ID_PARAM = "appid";
         private final String TAG = FetchWeatherTask.class.getSimpleName();
 
         @Override
-        protected Void doInBackground(Void... params) {
-            String receivedJson = retrieveForecastJsonString();
-            Log.d(TAG, receivedJson);
+        protected Void doInBackground(String... params) {
+            String location = params[0];
+            String forecastData = retrieveForecastDataForLocation(location);
+            Log.d(TAG, forecastData);
             return null;
         }
 
-        private String retrieveForecastJsonString() {
-            // These two need to be declared outside the try/catch
-            // so that they can be closed in the finally block.
+        private String retrieveForecastDataForLocation(String location) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
-            // Will contain the raw JSON response as a string.
-            String forecastJsonStr = null;
-
             try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are available at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
-                URL url = new URL(apiUrl);
+                URL url = new URL(buildRequestUri(location));
 
-                // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
 
-                // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
-                    // Nothing to do.
-                    forecastJsonStr = null;
+                    return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
+                StringBuilder buffer = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
+                    buffer.append(line).append("\n");
                 }
 
                 if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    forecastJsonStr = null;
+                    return null;
                 }
-                forecastJsonStr = buffer.toString();
+                return buffer.toString();
             } catch (IOException e) {
-                Log.e("PlaceholderFragment", "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attempting
-                // to parse it.
-                forecastJsonStr = null;
+                Log.e(TAG, "Error ", e);
+                return null;
             } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
-                    }
-                }
+                closeUrlConnection(urlConnection);
+                closeReader(reader);
             }
-            return forecastJsonStr;
         }
 
-    }
+        private String buildRequestUri(String location) {
+            String mode = "json";
+            String units = "metric";
+            String days = "7";
+            String apiKey = "a81f2d1c3789ac0043ab476183c3c2da";
+            return Uri.parse(BASE_URL).buildUpon()
+                    .appendQueryParameter(QUERY_PARAM, location)
+                    .appendQueryParameter(MODE_PARAM, mode)
+                    .appendQueryParameter(UNITS_PARAM, units)
+                    .appendQueryParameter(COUNT_PARAM, days)
+                    .appendQueryParameter(APP_ID_PARAM, apiKey)
+                    .build().toString();
+        }
 
+        private void closeReader(BufferedReader reader) {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    Log.e(TAG, "Error closing stream", e);
+                }
+            }
+        }
+
+        private void closeUrlConnection(HttpURLConnection urlConnection) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+    }
 }
