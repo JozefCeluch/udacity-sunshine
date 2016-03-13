@@ -1,5 +1,6 @@
 package com.jozefceluch.sunshine.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_forecast, container, false);
 
-        List<String> forecastItems = new ArrayList<>();
+        final List<String> forecastItems = new ArrayList<>();
         forecastItems.add("Today - Sunny - 54/64");
         forecastItems.add("Tomorrow - Sunny - 54/24");
         forecastItems.add("Sunday - Raining - 43/64");
@@ -63,7 +63,10 @@ public class ForecastFragment extends Fragment {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Toast.makeText(getActivity(), forecastAdapter.getItem(position), Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        String forecastData = forecastAdapter.getItem(position);
+                        intent.putExtra(Intent.EXTRA_TEXT, forecastData);
+                        startActivity(intent);
                     }
                 }
         );
