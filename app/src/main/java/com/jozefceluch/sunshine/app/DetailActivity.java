@@ -31,10 +31,10 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-    public static class PlaceholderFragment extends Fragment {
+    public static class DetailFragment extends Fragment {
 
         public static final String SHARE_HASHTAG = " #SunshineApp";
-        private static final String TAG = PlaceholderFragment.class.getSimpleName();
+        private static final String TAG = DetailFragment.class.getSimpleName();
         private ShareActionProvider shareActionProvider;
         private String forecastString;
 
