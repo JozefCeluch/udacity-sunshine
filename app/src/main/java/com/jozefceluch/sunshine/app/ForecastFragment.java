@@ -106,6 +106,14 @@ public class ForecastFragment extends Fragment {
         private static final String COUNT_PARAM = "cnt";
         private static final String APP_ID_PARAM = "appid";
         private final String TAG = FetchWeatherTask.class.getSimpleName();
+        private String temperatureUnit;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            temperatureUnit = prefs.getString(getString(R.string.pref_units_key), getString(R.string.pref_units_default));
+        }
 
         @Override
         protected String[] doInBackground(String... params) {
@@ -126,9 +134,11 @@ public class ForecastFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String[] strings) {
-            forecastAdapter.clear();
-            for (String forecastItem : strings) {
-                forecastAdapter.add(forecastItem);
+            if (strings != null) {
+                forecastAdapter.clear();
+                for (String forecastItem : strings) {
+                    forecastAdapter.add(forecastItem);
+                }
             }
         }
 
@@ -210,13 +220,18 @@ public class ForecastFragment extends Fragment {
         /**
          * Prepare the weather high/lows for presentation.
          */
-        private String formatHighLows(double high, double low) {
+        private String formatHighLows(double high, double low, String unitType) {
+            if (unitType.equals(getString(R.string.pref_units_value_imperial))) {
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+            } else if (!unitType.equals(getString(R.string.pref_units_value_metric))) {
+                Log.d(TAG, "Unit type not found: " + unitType);
+            }
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
 
-            String highLowStr = roundedHigh + "/" + roundedLow;
-            return highLowStr;
+            return roundedHigh + "/" + roundedLow;
         }
 
         /**
@@ -285,7 +300,7 @@ public class ForecastFragment extends Fragment {
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
+                highAndLow = formatHighLows(high, low, temperatureUnit);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 

@@ -8,4 +8,24 @@
   <string name="pref_location_label">Location</string>
   <string name="pref_location_key" translatable="false">location</string>
   <string name="pref_location_default" translatable="false">London</string>
+
+  <string name="pref_units_label">Temperature Units</string>
+  <string name="pref_units_key" translatable="false">temperature_units</string>
+  <string name="pref_units_default" translatable="false">@string/pref_units_value_metric</string>
+
+  <string name="pref_units_entry_metric">Metric</string>
+  <string name="pref_units_entry_imperial">Imperial</string>
+
+  <string name="pref_units_value_metric" translatable="false">metric</string>
+  <string name="pref_units_value_imperial" translatable="false">imperial</string>
+
+  <array name="pref_units_entries">
+    <item>@string/pref_units_entry_metric</item>
+    <item>@string/pref_units_entry_imperial</item>
+  </array>
+
+  <array name="pref_units_entry_values">
+    <item>@string/pref_units_value_metric</item>
+    <item>@string/pref_units_value_imperial</item>
+  </array>
 </resources>
