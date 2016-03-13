@@ -92,17 +92,21 @@ public class ForecastFragment extends Fragment {
             String forecastData = retrieveForecastDataForLocation(location, daysCount);
             if (forecastData != null) {
                 try {
-                    String[] result = getWeatherDataFromJson(forecastData, daysCount);;
-                    for (String s : result) {
-                        Log.d(TAG, s);
-                    }
-                    return result;
+                    return getWeatherDataFromJson(forecastData, daysCount);
                 } catch (JSONException e) {
                     Log.e(TAG, "Unable to parse JSON",e);
                     return null;
                 }
             } else {
                 return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            forecastAdapter.clear();
+            for (String forecastItem : strings) {
+                forecastAdapter.add(forecastItem);
             }
         }
 
