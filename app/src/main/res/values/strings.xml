@@ -18,6 +18,7 @@
 
   <string name="pref_units_value_metric" translatable="false">metric</string>
   <string name="pref_units_value_imperial" translatable="false">imperial</string>
+  <string name="action_view_on_map">View on map</string>
 
   <array name="pref_units_entries">
     <item>@string/pref_units_entry_metric</item>
