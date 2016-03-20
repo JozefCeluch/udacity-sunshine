@@ -9,11 +9,11 @@
 ###Lesson 3
     - DONE
 ###Lesson 4A 
-    - IN PROGRESS
+    - DONE
 ###Lesson 4B 
-    - TODO
+    - DONE
 ###Lesson 4C 
-    - TODO
+    - IN PROGRESS
 ###Lesson 5 
     - TODO
 ###Lesson 6 
