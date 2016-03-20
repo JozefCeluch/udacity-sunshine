@@ -24,6 +24,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
+
+import static com.jozefceluch.sunshine.app.data.WeatherContract.*;
+
 public class WeatherProvider extends ContentProvider {
 
     // The URI Matcher used by this content provider.
@@ -117,14 +120,22 @@ public class WeatherProvider extends ContentProvider {
     static UriMatcher buildUriMatcher() {
         // 1) The code passed into the constructor represents the code to return for the root
         // URI.  It's common to use NO_MATCH as the code for this case. Add the constructor below.
-
-
+        UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         // 2) Use the addURI function to match each of the types.  Use the constants from
         // WeatherContract to help define the types to the UriMatcher.
+        final String authority = CONTENT_AUTHORITY;
+        final String weatherPath = WeatherContract.PATH_WEATHER;
+        final String locationPath = WeatherContract.PATH_LOCATION;
+        final String weatherWithLocationPath = weatherPath + "/*";
+        final String weatherWithLocationAndDatePath = weatherWithLocationPath + "/#";
 
+        uriMatcher.addURI(authority, weatherPath, WEATHER);
+        uriMatcher.addURI(authority, locationPath, LOCATION);
+        uriMatcher.addURI(authority, weatherWithLocationPath, WEATHER_WITH_LOCATION);
+        uriMatcher.addURI(authority, weatherWithLocationAndDatePath, WEATHER_WITH_LOCATION_AND_DATE);
 
         // 3) Return the new matcher!
-        return null;
+        return uriMatcher;
     }
 
     /*
