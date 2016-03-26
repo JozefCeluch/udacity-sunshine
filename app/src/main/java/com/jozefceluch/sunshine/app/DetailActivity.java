@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -95,8 +96,8 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onStart() {
-            super.onStart();
+        public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
             getLoaderManager().initLoader(DETAIL_LOADER_ID, null, this);
         }
 

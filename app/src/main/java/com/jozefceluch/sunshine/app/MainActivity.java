@@ -13,12 +13,22 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String FORECAST_FRAGMENT_TAG = "forecast_fragment";
+    private String location;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        location = sp.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, new ForecastFragment(), FORECAST_FRAGMENT_TAG)
+                    .commit();
+        }
     }
 
     @Override
@@ -26,6 +36,19 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String updatedLocation = Utility.getPreferredLocation(this);
+        if (updatedLocation != null && !location.equals(updatedLocation)) {
+            ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager().findFragmentByTag(FORECAST_FRAGMENT_TAG);
+            if (forecastFragment != null) {
+                forecastFragment.onLocationChanged();
+            }
+            location = updatedLocation;
+        }
     }
 
     @Override
