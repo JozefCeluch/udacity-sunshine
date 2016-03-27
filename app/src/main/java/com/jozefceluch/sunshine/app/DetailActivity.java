@@ -16,6 +16,12 @@ public class DetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.weather_detail_container, DetailFragment.newInstance(getIntent().getData()))
+                    .commit();
+        }
     }
 
 }

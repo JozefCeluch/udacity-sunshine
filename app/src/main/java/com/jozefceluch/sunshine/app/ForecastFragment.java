@@ -1,6 +1,5 @@
 package com.jozefceluch.sunshine.app;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +22,23 @@ import static com.jozefceluch.sunshine.app.data.WeatherContract.LocationEntry;
 import static com.jozefceluch.sunshine.app.data.WeatherContract.WeatherEntry;
 
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final String STATE_POSITION = "selected_pos_state";
+    private ListView forecastList;
+    private int selectedPosition = ListView.INVALID_POSITION;
+    private boolean twoPane;
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(Uri dateUri);
+    }
 
     private static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
@@ -68,26 +84,26 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_forecast, container, false);
+        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_POSITION)) {
+            selectedPosition = savedInstanceState.getInt(STATE_POSITION);
+        }
 
         forecastAdapter = new ForecastAdapter(getActivity(), null, 0);
-        final ListView forecastList = (ListView) rootView.findViewById(R.id.listview_forecast);
+        forecastList = (ListView) rootView.findViewById(R.id.listview_forecast);
         forecastList.setAdapter(forecastAdapter);
         forecastList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // CursorAdapter returns a cursor at the correct position for getItem(), or null
-                // if it cannot seek to that position.
                 Cursor cursor = (Cursor) forecastList.getItemAtPosition(position);
                 if (cursor != null) {
                     String locationSetting = Utility.getPreferredLocation(getActivity());
-                    Intent intent = new Intent(getActivity(), DetailActivity.class)
-                            .setData(WeatherEntry.buildWeatherLocationWithDate(
-                                    locationSetting, cursor.getLong(COL_WEATHER_DATE)
-                            ));
-                    startActivity(intent);
+                    ((Callback) getActivity())
+                            .onItemSelected(WeatherEntry.buildWeatherLocationWithDate(locationSetting, cursor.getLong(COL_WEATHER_DATE)));
                 }
+                selectedPosition = position;
             }
         });
+        useTodayLayout(twoPane);
         return rootView;
     }
 
@@ -145,10 +161,32 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         forecastAdapter.swapCursor(data);
         Log.d(TAG, "loading finished");
+        if (selectedPosition != ListView.INVALID_POSITION) {
+            forecastList.smoothScrollToPosition(selectedPosition);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
        forecastAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (selectedPosition != ListView.INVALID_POSITION) {
+            outState.putInt(STATE_POSITION, selectedPosition);
+        }
+    }
+
+    public void setTwoPaneMode(boolean isTwoPane) {
+        twoPane = isTwoPane;
+        useTodayLayout(isTwoPane);
+    }
+
+    private void useTodayLayout(boolean isTwoPane) {
+        if (forecastAdapter != null) {
+            forecastAdapter.setUseTodayLayout(!isTwoPane);
+        }
     }
 }

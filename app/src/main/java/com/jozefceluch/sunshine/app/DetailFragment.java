@@ -2,6 +2,7 @@ package com.jozefceluch.sunshine.app;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -20,6 +21,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.jozefceluch.sunshine.app.data.WeatherContract;
 
 import static com.jozefceluch.sunshine.app.data.WeatherContract.LocationEntry;
 import static com.jozefceluch.sunshine.app.data.WeatherContract.WeatherEntry;
@@ -58,6 +61,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_WEATHER_WIND_SPEED = 7;
     public static final int COL_WEATHER_DEGREES = 8;
     public static final int COL_WEATHER_CONDITION_ID = 9;
+    private static final String DETAIL_URI_ARG = "arg_detail_uri";
 
     private ShareActionProvider shareActionProvider;
     private String forecastString;
@@ -70,6 +74,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView humidityView;
     private TextView windView;
     private TextView pressureView;
+    private Uri detailUri;
+
+    public static DetailFragment newInstance(Uri detailUri) {
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(DETAIL_URI_ARG, detailUri);
+        DetailFragment fragment = new DetailFragment();
+        fragment.setArguments(arguments);
+
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,6 +94,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Bundle args = getArguments();
+        if (args != null) {
+            detailUri = args.getParcelable(DETAIL_URI_ARG);
+        }
+
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         iconView = (ImageView) rootView.findViewById(R.id.detail_icon);
         dateView = (TextView) rootView.findViewById(R.id.detail_date_textview);
@@ -150,12 +169,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Intent intent = getActivity().getIntent();
-        if (intent == null) {
+        if (detailUri == null) {
             return null;
         }
         return new CursorLoader(
                 getActivity(),
-                intent.getData(),
+                detailUri,
                 DETAIL_COLUMNS,
                 null,
                 null,
@@ -219,5 +238,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    void onLocationChanged(String newLocation) {
+        // replace the uri, since the location has changed
+        Uri uri = detailUri;
+        if (null != uri) {
+            long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
+            Uri updatedUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(newLocation, date);
+            detailUri = updatedUri;
+            getLoaderManager().restartLoader(DETAIL_LOADER_ID, null, this);
+        }
     }
 }

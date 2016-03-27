@@ -11,10 +11,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
-    private static final String FORECAST_FRAGMENT_TAG = "forecast_fragment";
+    private static final String DETAIL_FRAGMENT_TAG = "detail_fragment";
     private String location;
+    private boolean twoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,13 +23,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        location = sp.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment(), FORECAST_FRAGMENT_TAG)
-                    .commit();
+        location = Utility.getPreferredLocation(this);
+        if (findViewById(R.id.weather_detail_container) != null) {
+            twoPane = true;
+        } else {
+            twoPane = false;
         }
+
+        ForecastFragment forecastFragment = ((ForecastFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_forecast));
+        forecastFragment.setTwoPaneMode(twoPane);
     }
 
     @Override
@@ -41,13 +45,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        String updatedLocation = Utility.getPreferredLocation(this);
-        if (updatedLocation != null && !location.equals(updatedLocation)) {
-            ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager().findFragmentByTag(FORECAST_FRAGMENT_TAG);
-            if (forecastFragment != null) {
-                forecastFragment.onLocationChanged();
+        String newLocation = Utility.getPreferredLocation(this);
+        // update the location in our second pane using the fragment manager
+        if (newLocation != null && !newLocation.equals(location)) {
+            ForecastFragment ff = (ForecastFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+            if (null != ff) {
+                ff.onLocationChanged();
+                ff.setTwoPaneMode(twoPane);
             }
-            location = updatedLocation;
+            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
+            if (null != df) {
+                df.onLocationChanged(newLocation);
+            }
+            location = newLocation;
         }
     }
 
@@ -84,5 +94,19 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Unable to show map", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onItemSelected(Uri dateUri) {
+        if (twoPane) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, DetailFragment.newInstance(dateUri), DETAIL_FRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.setData(dateUri);
+            startActivity(intent);
+        }
+
     }
 }
