@@ -5,12 +5,10 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:gravity="center_vertical"
   android:orientation="horizontal"
-  android:minHeight="?android:attr/listPreferredItemHeight"
-  android:padding="16dp">
+  android:minHeight="?android:attr/listPreferredItemHeight">
   
   <ImageView
     android:id="@+id/list_item_icon"
-    android:src="@mipmap/ic_launcher"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"/>
 
