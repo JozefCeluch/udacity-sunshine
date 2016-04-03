@@ -422,7 +422,11 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             // add to database
             if (cVVector.size() > 0) {
                 ContentValues[] valuesArray = cVVector.toArray(new ContentValues[cVVector.size()]);
-                getContext().getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, valuesArray);
+                ContentResolver contentResolver = getContext().getContentResolver();
+                contentResolver.bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, valuesArray);
+                contentResolver.delete(WeatherContract.WeatherEntry.CONTENT_URI,
+                                       WeatherContract.WeatherEntry.COLUMN_DATE + " <= ?",
+                                       new String[]{Long.toString(dayTime.setJulianDay(julianStartDay - 1))});
                 notifyWeather();
             }
 
