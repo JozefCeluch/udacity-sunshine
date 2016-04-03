@@ -249,4 +249,8 @@ public class Utility {
         }
         return -1;
     }
+
+    public static String formatTemperature(Context context, double high) {
+        return formatTemperature(context, high, isMetric(context));
+    }
 }
