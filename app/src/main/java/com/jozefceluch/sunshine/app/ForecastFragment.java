@@ -1,5 +1,6 @@
 package com.jozefceluch.sunshine.app;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.jozefceluch.sunshine.app.sync.SunshineSyncAdapter;
 
@@ -128,12 +130,35 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_refresh) {
-            updateWeather();
+        if (item.getItemId() == R.id.action_view_on_map) {
+            openPreferredLocationInMap();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openPreferredLocationInMap() {
+        if (null != forecastAdapter) {
+            Cursor cursor = forecastAdapter.getCursor();
+            if (null != cursor) {
+                cursor.moveToPosition(0);
+                String posLat = cursor.getString(COL_COORD_LAT);
+                String posLong = cursor.getString(COL_COORD_LONG);
+                Uri geoLocation = Uri.parse("geo:" + posLat + "," + posLong);
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(geoLocation);
+
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                } else {
+                    Log.d(TAG, "Couldn't call " + geoLocation.toString() + ", no receiving apps installed!");
+                    Toast.makeText(getActivity(), "Unable to show map", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        }
     }
 
     private void updateWeather() {
@@ -149,12 +174,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         Uri weatherForLocationUri = WeatherEntry.buildWeatherLocationWithStartDate(
                 locationSetting, System.currentTimeMillis());
 
-        return new CursorLoader(getActivity(),
-                                weatherForLocationUri,
-                                FORECAST_COLUMNS,
-                                null,
-                                null,
-                                sortOrder);
+        return new CursorLoader(
+                getActivity(),
+                weatherForLocationUri,
+                FORECAST_COLUMNS,
+                null,
+                null,
+                sortOrder
+        );
     }
 
     @Override
@@ -168,7 +195,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-       forecastAdapter.swapCursor(null);
+        forecastAdapter.swapCursor(null);
     }
 
     @Override
