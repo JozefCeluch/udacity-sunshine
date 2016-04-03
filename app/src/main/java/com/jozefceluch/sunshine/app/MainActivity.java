@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.jozefceluch.sunshine.app.sync.SunshineSyncAdapter;
+
 public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
     private static final String DETAIL_FRAGMENT_TAG = "detail_fragment";
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         ForecastFragment forecastFragment = ((ForecastFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_forecast));
         forecastFragment.setTwoPaneMode(twoPane);
+        SunshineSyncAdapter.initializeSyncAdapter(this);
     }
 
     @Override
