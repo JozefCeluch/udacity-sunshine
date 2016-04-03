@@ -13,8 +13,11 @@
 ###Lesson 4B 
     - DONE
 ###Lesson 4C 
-    - IN PROGRESS
+    - DONE
 ###Lesson 5 
-    - TODO
+    - DONE
 ###Lesson 6 
-    - TODO
+    - DONE
+    
+###Project
+ - IN PROGRESS (will be in a separate repo)
