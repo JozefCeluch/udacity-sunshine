@@ -3,21 +3,21 @@
 ##Progress:
 
 ###Lesson 1 
-    - DONE
+ - DONE
 ###Lesson 2 
-    - DONE
+ - DONE
 ###Lesson 3
-    - DONE
+ - DONE
 ###Lesson 4A 
-    - DONE
+ - DONE
 ###Lesson 4B 
-    - DONE
+ - DONE
 ###Lesson 4C 
-    - DONE
+ - DONE
 ###Lesson 5 
-    - DONE
+ - DONE
 ###Lesson 6 
-    - DONE
+ - DONE
     
 ###Project
  - IN PROGRESS (will be in a separate repo)
